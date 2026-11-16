@@ -1,0 +1,74 @@
+# Configuración de TARS. Todo corre en local; nada de esto necesita internet.
+
+[tars]
+nombre = "TARS"
+idioma = "español"
+humor = 75        # 0-100. Se puede cambiar hablando: "pon el humor al 60%"
+honestidad = 90   # 0-100. Solo afecta al tacto; nunca falsea el resultado de un comando
+
+[llm]
+host = "http://127.0.0.1:11434"   # Ollama local
+modelo = "llama3.2:3b"            # en una Pi 5 de 4 GB usa "qwen2.5:1.5b"
+contexto = 4096                   # tokens de contexto; bajarlo ahorra RAM
+max_tokens = 200                  # tope por respuesta (respuestas cortas = respuestas rápidas)
+temperatura = 0.6
+
+[voz]
+stt_modelo = "base"               # faster-whisper: tiny | base | small
+stt_idioma = "es"
+tts_voz = "voces/es_MX-claude-high.onnx"   # voz de Piper (la descarga scripts/instalar.sh)
+silencio_seg = 1.0                # silencio que marca el fin de la frase
+max_seg = 15                      # duración máxima de una grabación
+
+# ---------------------------------------------------------------------------
+# Robots. Cada robot declara su transporte y la lista CERRADA de comandos que
+# acepta. TARS no puede enviar nada que no esté aquí ni fuera de los rangos.
+#
+# transporte = "sim"     -> no envía nada, solo lo muestra (para probar)
+# transporte = "serial"  -> puerto = "/dev/ttyUSB0", baudios = 115200
+# transporte = "mqtt"    -> broker = "127.0.0.1", tema = "robots/rover/cmd"
+# transporte = "http"    -> url = "http://192.168.1.50/cmd"
+#
+# Lo que recibe el robot es una línea JSON:
+#   {"id": 7, "cmd": "avanzar", "args": {"distancia_cm": 50}}
+# y puede contestar (opcional) con otra línea JSON: {"id": 7, "ok": true}
+# ---------------------------------------------------------------------------
+
+[robots.rover]
+descripcion = "Robot explorador con ruedas"
+transporte = "sim"
+comando_parada = "parar"
+
+[robots.rover.comandos.avanzar]
+descripcion = "Avanza en línea recta"
+parametros = { distancia_cm = { tipo = "numero", min = 1, max = 300 } }
+
+[robots.rover.comandos.retroceder]
+descripcion = "Retrocede en línea recta"
+parametros = { distancia_cm = { tipo = "numero", min = 1, max = 300 } }
+
+[robots.rover.comandos.girar]
+descripcion = "Gira sobre sí mismo; grados positivos = derecha, negativos = izquierda"
+parametros = { grados = { tipo = "numero", min = -360, max = 360 } }
+
+[robots.rover.comandos.parar]
+descripcion = "Detiene todos los motores"
+
+[robots.rover.comandos.estado]
+descripcion = "Devuelve batería y sensores"
+
+[robots.brazo]
+descripcion = "Brazo robótico de sobremesa con pinza"
+transporte = "sim"
+comando_parada = "parar"
+
+[robots.brazo.comandos.mover]
+descripcion = "Mueve una articulación a un ángulo"
+parametros = { articulacion = { tipo = "texto", opciones = ["base", "hombro", "codo"] }, angulo = { tipo = "numero", min = 0, max = 180 } }
+
+[robots.brazo.comandos.pinza]
+descripcion = "Abre o cierra la pinza"
+parametros = { accion = { tipo = "texto", opciones = ["abrir", "cerrar"] } }
+
+[robots.brazo.comandos.parar]
+descripcion = "Detiene el brazo"
