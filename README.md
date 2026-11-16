@@ -17,6 +17,8 @@ tú> pon el humor al 30
 TARS> Humor ajustado al 30 por ciento.
 ```
 
+> ¿Primera vez? Lee la [guía paso a paso](GUIA.md).
+
 ## Cómo funciona
 
 ```
